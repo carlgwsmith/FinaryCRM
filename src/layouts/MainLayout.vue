@@ -67,13 +67,9 @@
       <!-- Top bar -->
       <header class="crm-topbar">
         <!-- Mobile menu toggle -->
-        <q-btn
-          flat
-          round
-          icon="menu"
-          class="mobile-toggle"
-          @click="sidebarOpen = !sidebarOpen"
-        />
+        <button class="mobile-toggle" @click="sidebarOpen = !sidebarOpen">
+          <q-icon name="menu" size="22px" />
+        </button>
 
         <div class="topbar-spacer" />
 
@@ -235,26 +231,6 @@ function logout() {
   }
 }
 
-// Mobile
-.mobile-toggle {
-  display: none;
-
-  @media (max-width: 1024px) {
-    display: flex;
-  }
-}
-
-.mobile-overlay {
-  display: none;
-
-  @media (max-width: 1024px) {
-    display: block;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.4);
-    z-index: 99;
-  }
-}
 
 // Page transitions
 .page-fade-enter-active,

@@ -99,14 +99,16 @@ body {
 }
 
 .crm-sidebar {
+  display: flex;
+  flex-direction: column;
   width: var(--sidebar-width);
-  min-height: 100vh;
+  height: 100vh;
   background: linear-gradient(180deg, $nav-dark-start 35.625%, $nav-dark-end 97.396%);
   position: fixed;
   left: 0;
   top: 0;
   z-index: 100;
-  flex-shrink: 0;
+  overflow-y: auto;
 }
 
 .crm-main {
@@ -388,21 +390,55 @@ body {
   }
 }
 
+// === HAMBURGER / MOBILE OVERLAY ===
+.mobile-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  color: $text-secondary;
+  line-height: 1;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.04);
+  }
+}
+
+.mobile-overlay {
+  display: none;
+}
+
 // === RESPONSIVE ===
 @media (max-width: 1024px) {
   .crm-sidebar {
-    width: 220px;
     transform: translateX(-220px);
     transition: transform 0.3s ease;
-    overflow: hidden;
+    pointer-events: none;
 
     &.open {
       transform: translateX(0);
+      pointer-events: auto;
     }
   }
 
   .crm-main {
     margin-left: 0;
+  }
+
+  .mobile-toggle {
+    display: flex;
+  }
+
+  .mobile-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 99;
   }
 }
 
