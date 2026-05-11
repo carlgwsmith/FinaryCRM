@@ -29,6 +29,7 @@ module.exports = configure(function (/* ctx */) {
       },
 
       vueRouterMode: 'hash',
+      publicPath: '/FinaryCRM/',
       vitePlugins: [],
     },
 
