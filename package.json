@@ -22,6 +22,9 @@
     "eslint": "^8.57.0",
     "eslint-plugin-vue": "^9.21.0"
   },
+  "overrides": {
+    "vite": "^4.5.0"
+  },
   "engines": {
     "node": ">= 18.0.0",
     "npm": ">= 6.13.4",
