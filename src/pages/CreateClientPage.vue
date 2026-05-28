@@ -9,16 +9,21 @@
         <h3 class="crm-h3 section-title">Personal Information</h3>
         <div class="form-grid">
           <div class="form-field">
-            <label>Full Name</label>
-            <input v-model="name" placeholder="Robert Lee" :class="['crm-input', { 'input-error': errors.name }]" />
-            <span v-if="errors.name" class="field-error">{{ errors.name }}</span>
+            <label>First Name</label>
+            <input v-model="firstName" placeholder="Robert" :class="['crm-input', { 'input-error': errors.firstName }]" />
+            <span v-if="errors.name" class="field-error">{{ errors.firstName }}</span>
+          </div>
+          <div class="form-field">
+            <label>Last Name</label>
+            <input v-model="lastName" placeholder="Hill" :class="['crm-input', { 'input-error': errors.lastName }]" />
+            <span v-if="errors.lastName" class="field-error">{{ errors.lastName }}</span>
           </div>
           <div class="form-field">
             <label>Email</label>
             <input v-model="email" type="email" placeholder="email@example.com" :class="['crm-input', { 'input-error': errors.email }]" />
             <span v-if="errors.email" class="field-error">{{ errors.email }}</span>
           </div>
-          <div class="form-field">
+          <!-- <div class="form-field">
             <label>Phone</label>
             <input v-model="phone" placeholder="(555) 123-4567" :class="['crm-input', { 'input-error': errors.phone }]" />
             <span v-if="errors.phone" class="field-error">{{ errors.phone }}</span>
@@ -37,7 +42,7 @@
             <label>Goal Progress (%)</label>
             <input v-model="goalProgress" type="number" placeholder="80" :class="['crm-input', { 'input-error': errors.goalProgress }]" />
             <span v-if="errors.goalProgress" class="field-error">{{ errors.goalProgress }}</span>
-          </div>
+          </div> -->
         </div>
       </div>
 
@@ -62,42 +67,44 @@ const router = useRouter()
 const store = useClientsStore()
 
 const schema = yup.object({
-  name: yup.string().required('Name is required'),
+  firstName: yup.string().required('First name is required'),
+  lastName: yup.string().required('Last name is required'),
   email: yup.string().email('Must be a valid email').required('Email is required'),
-  phone: yup.string().matches(/^[+\d\s\-().]*$/, 'Invalid phone format').optional(),
-  portfolioValue: yup.number()
-    .typeError('Must be a number')
-    .positive('Must be a positive number')
-    .nullable()
-    .transform((val, orig) => (orig === '' ? null : val))
-    .optional(),
-  riskScore: yup.number()
-    .typeError('Must be a number')
-    .min(0, 'Min is 0')
-    .max(100, 'Max is 100')
-    .nullable()
-    .transform((val, orig) => (orig === '' ? null : val))
-    .optional(),
-  goalProgress: yup.number()
-    .typeError('Must be a number')
-    .min(0, 'Min is 0')
-    .max(100, 'Max is 100')
-    .nullable()
-    .transform((val, orig) => (orig === '' ? null : val))
-    .optional()
+  // phone: yup.string().matches(/^[+\d\s\-().]*$/, 'Invalid phone format').optional(),
+  // portfolioValue: yup.number()
+  //   .typeError('Must be a number')
+  //   .positive('Must be a positive number')
+  //   .nullable()
+  //   .transform((val, orig) => (orig === '' ? null : val))
+  //   .optional(),
+  // riskScore: yup.number()
+  //   .typeError('Must be a number')
+  //   .min(0, 'Min is 0')
+  //   .max(100, 'Max is 100')
+  //   .nullable()
+  //   .transform((val, orig) => (orig === '' ? null : val))
+  //   .optional(),
+  // goalProgress: yup.number()
+  //   .typeError('Must be a number')
+  //   .min(0, 'Min is 0')
+  //   .max(100, 'Max is 100')
+  //   .nullable()
+  //   .transform((val, orig) => (orig === '' ? null : val))
+  //   .optional()
 })
 
 const { handleSubmit, errors } = useForm({ validationSchema: schema })
-const { value: name } = useField('name')
+const { value: firstName } = useField('firstName')
+const { value: lastName } = useField('lastName')
 const { value: email } = useField('email')
-const { value: phone } = useField('phone')
-const { value: portfolioValue } = useField('portfolioValue')
-const { value: riskScore } = useField('riskScore')
-const { value: goalProgress } = useField('goalProgress')
+// const { value: phone } = useField('phone')
+// const { value: portfolioValue } = useField('portfolioValue')
+// const { value: riskScore } = useField('riskScore')
+// const { value: goalProgress } = useField('goalProgress')
 
-const submit = handleSubmit((values) => {
-  const client = store.addClient(values)
-  router.push(`/clients/${client.id}`)
+const submit = handleSubmit(async (values) => {
+ const client = await store.addClient(values)
+  router.push(`/clients`)
 })
 </script>
 

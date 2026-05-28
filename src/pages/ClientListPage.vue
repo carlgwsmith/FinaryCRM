@@ -6,7 +6,7 @@ import { storeToRefs } from 'pinia'
 
 const clientStore = useClientsStore()
 const router = useRouter()
-const {clients} = storeToRefs(clientStore)
+const { clients, loading } = storeToRefs(clientStore)
 
 onMounted(() => clientStore.fetchClients())
 
@@ -19,11 +19,21 @@ const filters = [
   { key: 'high-risk', label: 'High Risk' }
 ]
 
+const columns = [
+  { name: 'name', label: 'Name', field: 'name', align: 'left', sortable: true },
+  { name: 'portfolioValue', label: 'Portfolio Value', field: 'portfolioValue', align: 'left', sortable: true },
+  { name: 'riskScore', label: 'Risk Score', field: 'riskScore', align: 'left', sortable: true },
+  { name: 'goalProgress', label: 'Goal Progress', field: 'goalProgress', align: 'left', sortable: true },
+  { name: 'lastUpdated', label: 'Last Updated', field: 'lastUpdated', align: 'left', sortable: true },
+  { name: 'status', label: 'Status', field: 'status', align: 'left', sortable: true },
+  { name: 'actions', label: '', field: 'id', align: 'right', sortable: false }
+]
+
 const filteredClients = computed(() => {
   let list = clients.value
   if (search.value) {
     const q = search.value.toLowerCase()
-    list = list.filter(c => c.name.toLowerCase().includes(q) || c.email.toLowerCase().includes(q))
+    list = list.filter(c => c.firstName.toLowerCase().includes(q) || c.lastName.toLowerCase().includes(q) || c.email.toLowerCase().includes(q))
   }
   if (activeFilter.value === 'active') {
     list = list.filter(c => c.status === 'active')
@@ -35,6 +45,10 @@ const filteredClients = computed(() => {
 
 function viewClient(id) {
   router.push(`/clients/${id}`)
+}
+
+const deleteClient = (id)=>{
+  clientStore.deleteClient(id);
 }
 
 function initials(name) {
@@ -54,7 +68,7 @@ function riskColor(score) {
 </script>
 
 <template>
-  <div class="client-list-page">
+  <div class="client-list-page" v-if="!loading">
     <!-- Header -->
     <div class="page-header">
       <h1 class="crm-h1">Clients</h1>
@@ -87,84 +101,90 @@ function riskColor(score) {
 
     <!-- Client table -->
     <div class="crm-card client-table-card">
-      <table class="client-table">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Portfolio Value</th>
-            <th>Risk Score</th>
-            <th>Goal Progress</th>
-            <th>Last Updated</th>
-            <th>Status</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody v-if="!clientStore.loading && !clientStore.error">
-          <tr
-            v-for="client in filteredClients"
-            :key="client.id"
-            class="client-tr"
-            @click="viewClient(client.id)"
-          >
-            <td class="name-cell">
-              <div class="client-avatar">{{ initials(client.firstName + ' ' +client.lastName) }}</div>
-              <div>
-                <div class="client-name-text">{{ client.name }}</div>
-                <div class="client-email">{{ client.email }}</div>
-              </div>
-            </td>
-            <td>
-              <span class="portfolio-val">{{ formatCurrency(client.portfolioValue) }}</span>
-            </td>
-            <td>
-              <div class="risk-bar-wrap">
-                <div class="risk-bar">
-                  <div
-                    class="risk-fill"
-                    :style="{ width: client.riskScore + '%', background: riskColor(client.riskScore) }"
-                  />
-                </div>
-                <span class="risk-num">{{ client.riskScore }}</span>
-              </div>
-            </td>
-            <td>
-              <div class="goal-progress-wrap">
-                <div class="goal-bar">
-                  <div
-                    class="goal-fill"
-                    :style="{ width: client.goalProgress + '%' }"
-                  />
-                </div>
-                <span class="goal-pct">{{ client.goalProgress }}%</span>
-              </div>
-            </td>
-            <td class="muted-text">{{ client.lastUpdated }}</td>
-            <td>
-              <span class="status-badge" :class="client.status">{{ client.status }}</span>
-            </td>
-            <td>
-              <button class="btn-tertiary" @click.stop="viewClient(client.id)">
-                View Client
-                <q-icon name="visibility" size="14px" />
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <q-table
+        :rows="filteredClients"
+        :columns="columns"
+        row-key="id"
+        wrap-cells
+        :loading="clientStore.loading"
+        :pagination="{ rowsPerPage: 0 }"
+        flat
+        hide-bottom
+        class="client-qtable"
+        @row-click="(evt, row) => viewClient(row.id)"
+      >
+        <template #body-cell-name="{ row }">
+          <td class="name-cell">
+            <div class="client-avatar">{{ initials(row.firstName + ' ' + row.lastName) }}</div>
+            <div>
+              <div class="client-name-text">{{ row.name }}</div>
+              <div class="client-email">{{ row.email }}</div>
+            </div>
+          </td>
+        </template>
 
-      <div v-if="clientStore.loading" class="empty-state">
-        <q-spinner size="40px" color="primary" />
-        <p>Loading clients...</p>
-      </div>
-      <div v-else-if="clientStore.error" class="empty-state">
-        <q-icon name="error_outline" size="48px" color="negative" />
-        <p>{{ clientStore.error }}</p>
-      </div>
-      <div v-else-if="!filteredClients.length" class="empty-state">
-        <q-icon name="people_outline" size="48px" color="grey-4" />
-        <p>No clients found</p>
-      </div>
+        <template #body-cell-portfolioValue="{ row }">
+          <td><span class="portfolio-val">{{ formatCurrency(row.portfolioValue) }}</span></td>
+        </template>
+
+        <template #body-cell-riskScore="{ row }">
+          <td>
+            <div class="risk-bar-wrap">
+              <div class="risk-bar">
+                <div class="risk-fill" :style="{ width: row.riskScore + '%', background: riskColor(row.riskScore) }" />
+              </div>
+              <span class="risk-num">{{ row.riskScore }}</span>
+            </div>
+          </td>
+        </template>
+
+        <template #body-cell-goalProgress="{ row }">
+          <td>
+            <div class="goal-progress-wrap">
+              <div class="goal-bar">
+                <div class="goal-fill" :style="{ width: row.goalProgress + '%' }" />
+              </div>
+              <span class="goal-pct">{{ row.goalProgress }}%</span>
+            </div>
+          </td>
+        </template>
+
+        <template #body-cell-lastUpdated="{ row }">
+          <td class="muted-text">{{ row.lastUpdated }}</td>
+        </template>
+
+        <template #body-cell-status="{ row }">
+          <td><span class="status-badge" :class="row.status">{{ row.status }}</span></td>
+        </template>
+
+        <template #body-cell-actions="{ row }">
+          <td class="text-right">
+            <button class="btn-tertiary" @click.stop="viewClient(row.id)">
+              View
+              <q-icon name="visibility" size="14px" />
+            </button>
+            <button class="btn-error" @click.stop="deleteClient(row.id)">
+              Delete
+              <q-icon name="delete" size="14px" />
+            </button>
+          </td>
+        </template>
+
+        <template #no-data>
+          <div v-if="clientStore.error" class="empty-state full-width">
+            <q-icon name="error_outline" size="48px" color="negative" />
+            <p>{{ clientStore.error }}</p>
+          </div>
+          <div v-else class="empty-state full-width">
+            <q-icon name="people_outline" size="48px" color="grey-4" />
+            <p>No clients found</p>
+          </div>
+        </template>
+      </q-table>
     </div>
+  </div>
+  <div class="flex justify-center items-center" v-else>
+    <q-spinner size="5em" color="primary"/>
   </div>
 </template>
 
@@ -233,40 +253,35 @@ function riskColor(score) {
   overflow: hidden;
 }
 
-.client-table {
-  width: 100%;
-  border-collapse: collapse;
-
-  th {
-    text-align: left;
-    padding: 12px 16px;
+.client-qtable {
+  :deep(thead th) {
     font-size: 12px;
     font-weight: 500;
     color: var(--crm-text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    border-bottom: 1px solid var(--crm-border);
     background: #fafafa;
+    border-bottom: 1px solid var(--crm-border);
   }
 
-  td {
-    padding: 14px 16px;
-    border-bottom: 1px solid #f5f5f5;
+  :deep(tbody td) {
     font-size: 14px;
     color: var(--crm-text);
-  }
-}
-
-.client-tr {
-  cursor: pointer;
-  transition: background 0.15s;
-
-  &:hover {
-    background: #fafafa;
+    border-bottom: 1px solid #f5f5f5;
+    padding: 14px 16px;
   }
 
-  &:last-child td {
-    border-bottom: none;
+  :deep(tbody tr) {
+    cursor: pointer;
+    transition: background 0.15s;
+
+    &:hover {
+      background: #fafafa;
+    }
+
+    &:last-child td {
+      border-bottom: none;
+    }
   }
 }
 

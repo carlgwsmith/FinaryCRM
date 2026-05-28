@@ -87,16 +87,33 @@ export const useClientsStore = defineStore('clients', {
       }
     },
 
-    addClient(client) {
+    async addClient(client) {
       const newClient = {
         ...client,
-        id: this.clients.length + 1,
-        lastUpdated: new Date().toLocaleDateString(),
-        status: 'active',
-        trades: []
+        // id: this.clients.length + 1,
+        // lastUpdated: new Date().toLocaleDateString(),
+        // status: 'active',
+        // trades: []
+      }
+      console.log(newClient)
+      try {
+        await api.post('/api/clients', newClient)
+      } catch (error) {
+        this.error = error.message
       }
       this.clients.push(newClient)
       return newClient
+    }
+,
+    async deleteClient(clientId){
+      try {
+        this.loading = true;
+        await api.delete(`/api/clients/${clientId}`)
+        await this.fetchClients();
+        this.loading = false;
+      } catch (error) {
+        this.error = error.message
+      }
     }
   }
 })
