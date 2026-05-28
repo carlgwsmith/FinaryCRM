@@ -21,14 +21,6 @@ export const useCRMStore = defineStore('crm', {
       pendingTransactions: 123
     },
 
-    // Recent clients
-    recentClients: [
-      { id: 1, name: 'Robert Lee',     lastUpdated: '2/3/2022', portfolioValue: 1240000, riskScore: 72 },
-      { id: 2, name: 'Andrew Santino', lastUpdated: '2/3/2022', portfolioValue: 3100000, riskScore: 88 },
-      { id: 3, name: 'Thomas Segura',  lastUpdated: '2/3/2022', portfolioValue: 890000,  riskScore: 61 },
-      { id: 4, name: 'Bart Kristmas',  lastUpdated: '2/3/2022', portfolioValue: 2200000, riskScore: 79 }
-    ],
-
     // Market data
     marketData: [
       { symbol: 'S&P 500',   change: -3.42, direction: 'down' },
@@ -84,61 +76,6 @@ export const useCRMStore = defineStore('crm', {
       { month: 'March',    value: 118000 }
     ],
 
-    // Client list (full)
-    clients: [
-      {
-        id: 1,
-        name: 'Robert Lee',
-        email: 'robert.lee@example.com',
-        phone: '(555) 123-4567',
-        portfolioValue: 1240000,
-        riskScore: 72,
-        goalProgress: 81,
-        status: 'active',
-        lastUpdated: '2/3/2022',
-        advisor: 'Carl Smith',
-        trades: []
-      },
-      {
-        id: 2,
-        name: 'Andrew Santino',
-        email: 'asantino@example.com',
-        phone: '(555) 234-5678',
-        portfolioValue: 3100000,
-        riskScore: 88,
-        goalProgress: 94,
-        status: 'active',
-        lastUpdated: '2/3/2022',
-        advisor: 'Carl Smith',
-        trades: []
-      },
-      {
-        id: 3,
-        name: 'Thomas Segura',
-        email: 'tsegura@example.com',
-        phone: '(555) 345-6789',
-        portfolioValue: 890000,
-        riskScore: 61,
-        goalProgress: 67,
-        status: 'active',
-        lastUpdated: '2/3/2022',
-        advisor: 'Carl Smith',
-        trades: []
-      },
-      {
-        id: 4,
-        name: 'Bart Kristmas',
-        email: 'bkristmas@example.com',
-        phone: '(555) 456-7890',
-        portfolioValue: 2200000,
-        riskScore: 79,
-        goalProgress: 82,
-        status: 'active',
-        lastUpdated: '2/3/2022',
-        advisor: 'Carl Smith',
-        trades: []
-      }
-    ]
   }),
 
   getters: {
@@ -148,10 +85,6 @@ export const useCRMStore = defineStore('crm', {
         currency: 'USD',
         maximumFractionDigits: 0
       }).format(state.kpis.assetsUnderManagement)
-    },
-
-    getClientById: (state) => (id) => {
-      return state.clients.find(c => c.id === Number(id))
     },
 
     newsTotalPages: (state) => Math.ceil(state.newsItems.length / state.newsPerPage),
@@ -176,17 +109,5 @@ export const useCRMStore = defineStore('crm', {
       }
     },
 
-    addClient(client) {
-      const newClient = {
-        ...client,
-        id: this.clients.length + 1,
-        lastUpdated: new Date().toLocaleDateString(),
-        status: 'active',
-        trades: []
-      }
-      this.clients.push(newClient)
-      this.kpis.activeClients++
-      return newClient
-    }
   }
 })

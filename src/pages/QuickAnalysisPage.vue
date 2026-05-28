@@ -17,15 +17,18 @@
       <div class="input-row">
         <div class="form-field">
           <label>Current Age</label>
-          <input v-model="form.currentAge" placeholder="$1,204,542" class="crm-input" />
+          <input v-model="currentAge" type="number" placeholder="45" :class="['crm-input', { 'input-error': errors.currentAge }]" />
+          <span v-if="errors.currentAge" class="field-error">{{ errors.currentAge }}</span>
         </div>
         <div class="form-field">
           <label>Age at Retirement</label>
-          <input v-model="form.retirementAge" placeholder="$1,204,542" class="crm-input" />
+          <input v-model="retirementAge" type="number" placeholder="65" :class="['crm-input', { 'input-error': errors.retirementAge }]" />
+          <span v-if="errors.retirementAge" class="field-error">{{ errors.retirementAge }}</span>
         </div>
         <div class="form-field">
           <label>Total Debts</label>
-          <input v-model="form.totalDebts" placeholder="$304,542" class="crm-input" />
+          <input v-model="totalDebts" type="number" placeholder="304542" :class="['crm-input', { 'input-error': errors.totalDebts }]" />
+          <span v-if="errors.totalDebts" class="field-error">{{ errors.totalDebts }}</span>
         </div>
       </div>
     </div>
@@ -102,13 +105,34 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useForm, useField } from 'vee-validate'
+import * as yup from 'yup'
 import DataTable from 'components/DataTable.vue'
 
-const form = ref({
-  currentAge: '',
-  retirementAge: '',
-  totalDebts: ''
+const schema = yup.object({
+  currentAge: yup.number()
+    .typeError('Must be a number')
+    .integer('Must be a whole number')
+    .min(18, 'Must be at least 18')
+    .required('Current age is required'),
+  retirementAge: yup.number()
+    .typeError('Must be a number')
+    .integer('Must be a whole number')
+    .required('Retirement age is required')
+    .test('greater-than-current', 'Must be greater than current age', function (value) {
+      const { currentAge } = this.parent
+      return !value || !currentAge || value > currentAge
+    }),
+  totalDebts: yup.number()
+    .typeError('Must be a number')
+    .min(0, 'Cannot be negative')
+    .required('Total debts is required')
 })
+
+const { handleSubmit, errors } = useForm({ validationSchema: schema })
+const { value: currentAge } = useField('currentAge')
+const { value: retirementAge } = useField('retirementAge')
+const { value: totalDebts } = useField('totalDebts')
 
 // ── Income sources ───────────────────────────────────────────
 const incomeColumns = [
@@ -177,9 +201,9 @@ function addAccount() {
 function removeAccount(id) { accounts.value = accounts.value.filter(r => r.id !== id) }
 
 // ── Generate ─────────────────────────────────────────────────
-function generateAnalysis() {
+const generateAnalysis = handleSubmit(() => {
   alert('Generating Quick Analysis...')
-}
+})
 </script>
 
 <style lang="scss" scoped>
@@ -252,6 +276,12 @@ function generateAnalysis() {
 
   &:focus { border-color: var(--crm-primary); }
   &::placeholder { color: #bbb; }
+  &.input-error { border-color: #e53935; }
+}
+
+.field-error {
+  font-size: 11px;
+  color: #e53935;
 }
 
 // Generate CTA

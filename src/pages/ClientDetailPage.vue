@@ -94,14 +94,14 @@
 <script setup>
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
-import { useCRMStore } from 'stores/crm'
+import { useClientsStore } from 'stores/clients'
 import GoalGauge from 'components/GoalGauge.vue'
 import PerformanceChart from 'components/PerformanceChart.vue'
 
 const route = useRoute()
-const store = useCRMStore()
+const clientsStore = useClientsStore()
 
-const client = computed(() => store.getClientById(route.params.id))
+const client = computed(() => clientsStore.getClientById(route.params.id))
 
 const samplePerformance = [
   { month: 'Jan', value: 40000 }, { month: 'Jan', value: 65000 },

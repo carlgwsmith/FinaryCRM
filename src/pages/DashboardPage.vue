@@ -168,30 +168,31 @@
             </div>
           </div>
           <div class="crm-card-body">
-            <ScheduleGrid :events="store.scheduleEvents" />
-          </div>
-        </div>
-
-        <!-- Recent Clients -->
-        <div class="recent-clients-section">
-          <h3 class="crm-h2 section-title">Recent Clients</h3>
-          <div
-            v-for="client in store.recentClients"
-            :key="client.id"
-            class="client-row"
-          >
-            <div>
-              <div class="client-name">{{ client.name }}</div>
-              <div class="client-updated">Last Updated: {{ client.lastUpdated }}</div>
-            </div>
-            <button class="btn-tertiary" @click="viewClient(client.id)">
-              View Client
-              <q-icon name="visibility" size="16px" />
-            </button>
+            <ScheduleGrid :events="store.scheduleEvents" :view="scheduleView" />
           </div>
         </div>
 
       </div>
+
+      <!-- Recent Clients — full width -->
+      <div class="recent-clients-section full-width">
+        <h3 class="crm-h2 section-title">Recent Clients</h3>
+        <div
+          v-for="client in clientsStore.recentClients"
+          :key="client.id"
+          class="client-row"
+        >
+          <div>
+            <div class="client-name">{{ client.name }}</div>
+            <div class="client-updated">Last Updated: {{ client.lastUpdated }}</div>
+          </div>
+          <button class="btn-tertiary" @click="viewClient(client.id)">
+            View Client
+            <q-icon name="visibility" size="16px" />
+          </button>
+        </div>
+      </div>
+
     </div>
   </div>
 </template>
@@ -200,12 +201,14 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCRMStore } from 'stores/crm'
+import { useClientsStore } from 'stores/clients'
 import PerformanceChart from 'components/PerformanceChart.vue'
 import GoalGauge from 'components/GoalGauge.vue'
 import ScheduleGrid from 'components/ScheduleGrid.vue'
 import NewsItem from 'components/NewsItem.vue'
 
 const store = useCRMStore()
+const clientsStore = useClientsStore()
 const router = useRouter()
 const scheduleView = ref('calendar')
 
@@ -408,6 +411,10 @@ function viewClient(id) {
   .section-title {
     margin-bottom: 16px;
     color: var(--crm-text);
+  }
+
+  &.full-width {
+    grid-column: 1 / -1;
   }
 }
 </style>

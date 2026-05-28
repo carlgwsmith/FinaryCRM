@@ -93,17 +93,17 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useCRMStore } from 'stores/crm'
+import { useClientsStore } from 'stores/clients'
 
 const route = useRoute()
 const router = useRouter()
-const store = useCRMStore()
+const clientsStore = useClientsStore()
 
 const showBuys = ref(true)
 const showSells = ref(false)
 const sortKey = ref('date')
 
-const client = computed(() => store.getClientById(route.params.id))
+const client = computed(() => clientsStore.getClientById(route.params.id))
 
 const columns = [
   { key: 'type',    label: 'Trade Type'   },

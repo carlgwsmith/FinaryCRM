@@ -19,9 +19,10 @@
             v-model="email"
             type="email"
             placeholder="carl@finary.com"
-            class="crm-input"
+            :class="['crm-input', { 'input-error': errors.email }]"
             @keyup.enter="login"
           />
+          <span v-if="errors.email" class="field-error">{{ errors.email }}</span>
         </div>
         <div class="form-field">
           <label>Password</label>
@@ -29,9 +30,10 @@
             v-model="password"
             type="password"
             placeholder="••••••••"
-            class="crm-input"
+            :class="['crm-input', { 'input-error': errors.password }]"
             @keyup.enter="login"
           />
+          <span v-if="errors.password" class="field-error">{{ errors.password }}</span>
         </div>
         <button class="btn-login" @click="login" :disabled="loading">
           <span v-if="!loading">Sign In</span>
@@ -52,18 +54,27 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useForm, useField } from 'vee-validate'
+import * as yup from 'yup'
 
 const router = useRouter()
-const email = ref('')
-const password = ref('')
 const loading = ref(false)
 
-async function login() {
+const schema = yup.object({
+  email: yup.string().email('Must be a valid email').required('Email is required'),
+  password: yup.string().min(8, 'Password must be at least 8 characters').required('Password is required')
+})
+
+const { handleSubmit, errors } = useForm({ validationSchema: schema })
+const { value: email } = useField('email')
+const { value: password } = useField('password')
+
+const login = handleSubmit(async () => {
   loading.value = true
   await new Promise(r => setTimeout(r, 600))
   loading.value = false
   router.push('/dashboard')
-}
+})
 </script>
 
 <style lang="scss" scoped>
@@ -169,6 +180,12 @@ async function login() {
 
   &:focus { border-color: #0066FF; }
   &::placeholder { color: #bbb; }
+  &.input-error { border-color: #e53935; }
+}
+
+.field-error {
+  font-size: 11px;
+  color: #e53935;
 }
 
 .btn-login {

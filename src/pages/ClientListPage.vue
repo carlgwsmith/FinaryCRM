@@ -1,3 +1,58 @@
+<script setup>
+import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { useClientsStore } from 'stores/clients'
+import { storeToRefs } from 'pinia'
+
+const clientStore = useClientsStore()
+const router = useRouter()
+const {clients} = storeToRefs(clientStore)
+
+onMounted(() => clientStore.fetchClients())
+
+const search = ref('')
+const activeFilter = ref('all')
+
+const filters = [
+  { key: 'all', label: 'All Clients' },
+  { key: 'active', label: 'Active' },
+  { key: 'high-risk', label: 'High Risk' }
+]
+
+const filteredClients = computed(() => {
+  let list = clients.value
+  if (search.value) {
+    const q = search.value.toLowerCase()
+    list = list.filter(c => c.name.toLowerCase().includes(q) || c.email.toLowerCase().includes(q))
+  }
+  if (activeFilter.value === 'active') {
+    list = list.filter(c => c.status === 'active')
+  } else if (activeFilter.value === 'high-risk') {
+    list = list.filter(c => c.riskScore >= 75)
+  }
+  return list
+})
+
+function viewClient(id) {
+  router.push(`/clients/${id}`)
+}
+
+function initials(name) {
+  if (!name) return '?'
+  return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
+}
+
+function formatCurrency(val) {
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(val)
+}
+
+function riskColor(score) {
+  if (score >= 80) return '#D20319'
+  if (score >= 60) return '#FF8C00'
+  return '#03BB4C'
+}
+</script>
+
 <template>
   <div class="client-list-page">
     <!-- Header -->
@@ -44,7 +99,7 @@
             <th></th>
           </tr>
         </thead>
-        <tbody>
+        <tbody v-if="!clientStore.loading && !clientStore.error">
           <tr
             v-for="client in filteredClients"
             :key="client.id"
@@ -52,7 +107,7 @@
             @click="viewClient(client.id)"
           >
             <td class="name-cell">
-              <div class="client-avatar">{{ initials(client.name) }}</div>
+              <div class="client-avatar">{{ initials(client.firstName + ' ' +client.lastName) }}</div>
               <div>
                 <div class="client-name-text">{{ client.name }}</div>
                 <div class="client-email">{{ client.email }}</div>
@@ -97,63 +152,21 @@
         </tbody>
       </table>
 
-      <div v-if="!filteredClients.length" class="empty-state">
+      <div v-if="clientStore.loading" class="empty-state">
+        <q-spinner size="40px" color="primary" />
+        <p>Loading clients...</p>
+      </div>
+      <div v-else-if="clientStore.error" class="empty-state">
+        <q-icon name="error_outline" size="48px" color="negative" />
+        <p>{{ clientStore.error }}</p>
+      </div>
+      <div v-else-if="!filteredClients.length" class="empty-state">
         <q-icon name="people_outline" size="48px" color="grey-4" />
         <p>No clients found</p>
       </div>
     </div>
   </div>
 </template>
-
-<script setup>
-import { ref, computed } from 'vue'
-import { useRouter } from 'vue-router'
-import { useCRMStore } from 'stores/crm'
-
-const store = useCRMStore()
-const router = useRouter()
-
-const search = ref('')
-const activeFilter = ref('all')
-
-const filters = [
-  { key: 'all', label: 'All Clients' },
-  { key: 'active', label: 'Active' },
-  { key: 'high-risk', label: 'High Risk' }
-]
-
-const filteredClients = computed(() => {
-  let list = store.clients
-  if (search.value) {
-    const q = search.value.toLowerCase()
-    list = list.filter(c => c.name.toLowerCase().includes(q) || c.email.toLowerCase().includes(q))
-  }
-  if (activeFilter.value === 'active') {
-    list = list.filter(c => c.status === 'active')
-  } else if (activeFilter.value === 'high-risk') {
-    list = list.filter(c => c.riskScore >= 75)
-  }
-  return list
-})
-
-function viewClient(id) {
-  router.push(`/clients/${id}`)
-}
-
-function initials(name) {
-  return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
-}
-
-function formatCurrency(val) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(val)
-}
-
-function riskColor(score) {
-  if (score >= 80) return '#D20319'
-  if (score >= 60) return '#FF8C00'
-  return '#03BB4C'
-}
-</script>
 
 <style lang="scss" scoped>
 .client-list-page {

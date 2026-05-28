@@ -10,34 +10,40 @@
         <div class="form-grid">
           <div class="form-field">
             <label>Full Name</label>
-            <input v-model="form.name" placeholder="Robert Lee" class="crm-input" />
+            <input v-model="name" placeholder="Robert Lee" :class="['crm-input', { 'input-error': errors.name }]" />
+            <span v-if="errors.name" class="field-error">{{ errors.name }}</span>
           </div>
           <div class="form-field">
             <label>Email</label>
-            <input v-model="form.email" type="email" placeholder="email@example.com" class="crm-input" />
+            <input v-model="email" type="email" placeholder="email@example.com" :class="['crm-input', { 'input-error': errors.email }]" />
+            <span v-if="errors.email" class="field-error">{{ errors.email }}</span>
           </div>
           <div class="form-field">
             <label>Phone</label>
-            <input v-model="form.phone" placeholder="(555) 123-4567" class="crm-input" />
+            <input v-model="phone" placeholder="(555) 123-4567" :class="['crm-input', { 'input-error': errors.phone }]" />
+            <span v-if="errors.phone" class="field-error">{{ errors.phone }}</span>
           </div>
           <div class="form-field">
             <label>Portfolio Value ($)</label>
-            <input v-model.number="form.portfolioValue" type="number" placeholder="1000000" class="crm-input" />
+            <input v-model="portfolioValue" type="number" placeholder="1000000" :class="['crm-input', { 'input-error': errors.portfolioValue }]" />
+            <span v-if="errors.portfolioValue" class="field-error">{{ errors.portfolioValue }}</span>
           </div>
           <div class="form-field">
             <label>Risk Score (0-100)</label>
-            <input v-model.number="form.riskScore" type="number" min="0" max="100" placeholder="75" class="crm-input" />
+            <input v-model="riskScore" type="number" placeholder="75" :class="['crm-input', { 'input-error': errors.riskScore }]" />
+            <span v-if="errors.riskScore" class="field-error">{{ errors.riskScore }}</span>
           </div>
           <div class="form-field">
             <label>Goal Progress (%)</label>
-            <input v-model.number="form.goalProgress" type="number" min="0" max="100" placeholder="80" class="crm-input" />
+            <input v-model="goalProgress" type="number" placeholder="80" :class="['crm-input', { 'input-error': errors.goalProgress }]" />
+            <span v-if="errors.goalProgress" class="field-error">{{ errors.goalProgress }}</span>
           </div>
         </div>
       </div>
 
       <div class="form-actions">
         <button class="btn-tertiary" @click="$router.push('/clients')">Cancel</button>
-        <button class="btn-primary" @click="submit" :disabled="!isValid">
+        <button class="btn-primary" @click="submit">
           <q-icon name="person_add" size="16px" style="margin-right:6px" />
           Create Client
         </button>
@@ -47,29 +53,52 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { useCRMStore } from 'stores/crm'
+import { useForm, useField } from 'vee-validate'
+import * as yup from 'yup'
+import { useClientsStore } from 'stores/clients'
 
 const router = useRouter()
-const store = useCRMStore()
+const store = useClientsStore()
 
-const form = ref({
-  name: '',
-  email: '',
-  phone: '',
-  portfolioValue: null,
-  riskScore: null,
-  goalProgress: null
+const schema = yup.object({
+  name: yup.string().required('Name is required'),
+  email: yup.string().email('Must be a valid email').required('Email is required'),
+  phone: yup.string().matches(/^[+\d\s\-().]*$/, 'Invalid phone format').optional(),
+  portfolioValue: yup.number()
+    .typeError('Must be a number')
+    .positive('Must be a positive number')
+    .nullable()
+    .transform((val, orig) => (orig === '' ? null : val))
+    .optional(),
+  riskScore: yup.number()
+    .typeError('Must be a number')
+    .min(0, 'Min is 0')
+    .max(100, 'Max is 100')
+    .nullable()
+    .transform((val, orig) => (orig === '' ? null : val))
+    .optional(),
+  goalProgress: yup.number()
+    .typeError('Must be a number')
+    .min(0, 'Min is 0')
+    .max(100, 'Max is 100')
+    .nullable()
+    .transform((val, orig) => (orig === '' ? null : val))
+    .optional()
 })
 
-const isValid = computed(() => form.value.name && form.value.email)
+const { handleSubmit, errors } = useForm({ validationSchema: schema })
+const { value: name } = useField('name')
+const { value: email } = useField('email')
+const { value: phone } = useField('phone')
+const { value: portfolioValue } = useField('portfolioValue')
+const { value: riskScore } = useField('riskScore')
+const { value: goalProgress } = useField('goalProgress')
 
-function submit() {
-  if (!isValid.value) return
-  const client = store.addClient(form.value)
+const submit = handleSubmit((values) => {
+  const client = store.addClient(values)
   router.push(`/clients/${client.id}`)
-}
+})
 </script>
 
 <style lang="scss" scoped>
@@ -120,6 +149,12 @@ function submit() {
 
   &:focus { border-color: var(--crm-primary); }
   &::placeholder { color: #bbb; }
+  &.input-error { border-color: #e53935; }
+}
+
+.field-error {
+  font-size: 11px;
+  color: #e53935;
 }
 
 .form-actions {

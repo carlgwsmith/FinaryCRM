@@ -12,24 +12,28 @@
           <div class="form-row">
             <div class="form-field">
               <label>Full Name</label>
-              <input v-model="profile.name" class="crm-input" />
+              <input v-model="name" :class="['crm-input', { 'input-error': errors.name }]" />
+              <span v-if="errors.name" class="field-error">{{ errors.name }}</span>
             </div>
             <div class="form-field">
               <label>Email</label>
-              <input v-model="profile.email" type="email" class="crm-input" />
+              <input v-model="email" type="email" :class="['crm-input', { 'input-error': errors.email }]" />
+              <span v-if="errors.email" class="field-error">{{ errors.email }}</span>
             </div>
           </div>
           <div class="form-row">
             <div class="form-field">
               <label>Role</label>
-              <input v-model="profile.role" class="crm-input" />
+              <input v-model="role" :class="['crm-input', { 'input-error': errors.role }]" />
+              <span v-if="errors.role" class="field-error">{{ errors.role }}</span>
             </div>
             <div class="form-field">
               <label>Firm</label>
-              <input v-model="profile.firm" class="crm-input" />
+              <input v-model="firm" :class="['crm-input', { 'input-error': errors.firm }]" />
+              <span v-if="errors.firm" class="field-error">{{ errors.firm }}</span>
             </div>
           </div>
-          <button class="btn-primary save-btn">Save Profile</button>
+          <button class="btn-primary save-btn" @click="saveProfile">Save Profile</button>
         </div>
       </div>
 
@@ -65,14 +69,37 @@
 <script setup>
 import { reactive } from 'vue'
 import { useCRMStore } from 'stores/crm'
+import { useForm, useField } from 'vee-validate'
+import * as yup from 'yup'
 
 const store = useCRMStore()
 
-const profile = reactive({
-  name:  store.currentUser.name,
-  email: store.currentUser.email,
-  role:  store.currentUser.role,
-  firm:  'Finary Advisors LLC'
+const schema = yup.object({
+  name: yup.string().required('Name is required'),
+  email: yup.string().email('Must be a valid email').required('Email is required'),
+  role: yup.string().required('Role is required'),
+  firm: yup.string().required('Firm is required')
+})
+
+const { handleSubmit, errors } = useForm({
+  validationSchema: schema,
+  initialValues: {
+    name: store.currentUser.name,
+    email: store.currentUser.email,
+    role: store.currentUser.role,
+    firm: 'Finary Advisors LLC'
+  }
+})
+
+const { value: name } = useField('name')
+const { value: email } = useField('email')
+const { value: role } = useField('role')
+const { value: firm } = useField('firm')
+
+const saveProfile = handleSubmit((values) => {
+  store.currentUser.name = values.name
+  store.currentUser.email = values.email
+  store.currentUser.role = values.role
 })
 
 const notifications = reactive([
@@ -136,6 +163,12 @@ const notifications = reactive([
   transition: border-color 0.2s;
 
   &:focus { border-color: var(--crm-primary); }
+  &.input-error { border-color: #e53935; }
+}
+
+.field-error {
+  font-size: 11px;
+  color: #e53935;
 }
 
 .save-btn { align-self: flex-start; }
