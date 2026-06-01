@@ -8,7 +8,9 @@ const clientStore = useClientsStore()
 const router = useRouter()
 const { clients, loading } = storeToRefs(clientStore)
 
-onMounted(() => clientStore.fetchClients())
+onMounted(() => {
+clientStore.fetchClients()
+})
 
 const search = ref('')
 const activeFilter = ref('all')
@@ -44,7 +46,11 @@ const filteredClients = computed(() => {
 })
 
 function viewClient(id) {
-  router.push(`/clients/${id}`)
+  router.push(`/clients/edit/${id}`)
+}
+
+function editClient(id) {
+  router.push(`/clients/edit/${id}`)
 }
 
 const deleteClient = (id)=>{
@@ -162,6 +168,10 @@ function riskColor(score) {
             <button class="btn-tertiary" @click.stop="viewClient(row.id)">
               View
               <q-icon name="visibility" size="14px" />
+            </button>
+            <button class="btn-tertiary" @click.stop="editClient(row.id)">
+              Edit
+              <q-icon name="edit" size="14px" />
             </button>
             <button class="btn-error" @click.stop="deleteClient(row.id)">
               Delete

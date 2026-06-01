@@ -1,4 +1,4 @@
-import { createRouter, createWebHashHistory } from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
 
 const routes = [
   {
@@ -22,16 +22,23 @@ const routes = [
         meta: { title: 'Clients' }
       },
       {
-        path: 'clients/:id',
-        name: 'ClientDetail',
-        component: () => import('pages/ClientDetailPage.vue'),
-        meta: { title: 'Client Detail' }
-      },
-      {
         path: 'clients/create',
         name: 'CreateClient',
         component: () => import('pages/CreateClientPage.vue'),
         meta: { title: 'Create Client' }
+      },
+      {
+        path: 'clients/edit/:id',
+        name: 'CreateClient',
+        component: () => import('pages/CreateClientPage.vue'),
+        meta: { title: 'Edit Client' },
+        props: route => ({isEdit:true, id: route.params.id})
+      },
+      {
+        path: 'clients/:id',
+        name: 'ClientDetail',
+        component: () => import('pages/ClientDetailPage.vue'),
+        meta: { title: 'Client Detail' }
       },
       {
         path: 'clients/:id/trades',
@@ -73,7 +80,7 @@ const routes = [
 ]
 
 export default createRouter({
-  history: createWebHashHistory(),
+  history: createWebHistory('/FinaryCRM/'),
   routes,
   scrollBehavior: () => ({ left: 0, top: 0 })
 })

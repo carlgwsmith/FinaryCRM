@@ -15,8 +15,8 @@
     <nav class="sidebar-nav">
       <RouterLink
         v-for="item in navItems"
-        :key="item.path"
-        :to="item.path"
+        :key="item.label"
+        :to="item.to"
         custom
         v-slot="{ navigate, isActive }"
       >
@@ -39,14 +39,14 @@
 
     <!-- Bottom nav -->
     <div class="sidebar-bottom">
-      <RouterLink to="/settings" custom v-slot="{ navigate, isActive }">
+      <RouterLink :to="{ name: 'Settings' }" custom v-slot="{ navigate, isActive }">
         <div class="nav-item" :class="{ active: isActive }" @click="navigate(); open = false">
           <q-icon name="settings" size="18px" class="nav-icon" />
           <span class="nav-label">Settings</span>
         </div>
       </RouterLink>
 
-      <RouterLink to="/support" custom v-slot="{ navigate, isActive }">
+      <RouterLink :to="{ name: 'Support' }" custom v-slot="{ navigate, isActive }">
         <div class="nav-item" :class="{ active: isActive }" @click="navigate(); open = false">
           <q-icon name="help_outline" size="18px" class="nav-icon" />
           <span class="nav-label">Support</span>
@@ -66,9 +66,9 @@ const route = useRoute()
 const activeRoute = computed(() => route.path)
 
 const navItems = [
-  { path: '/dashboard',      label: 'Dashboard',     icon: 'dashboard' },
-  { path: '/clients',        label: 'Clients',        icon: 'people',  children: true },
-  { path: '/quick-analysis', label: 'Quick Analysis', icon: 'speed' }
+  { to: { name: 'Dashboard' },     label: 'Dashboard',     icon: 'dashboard' },
+  { to: { name: 'ClientList' },    label: 'Clients',        icon: 'people',  children: true },
+  { to: { name: 'QuickAnalysis' }, label: 'Quick Analysis', icon: 'speed' }
 ]
 </script>
 
