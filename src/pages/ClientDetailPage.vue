@@ -10,7 +10,7 @@
     <!-- Header card -->
     <div class="crm-card client-header-card">
       <div class="client-hero">
-        <div class="client-avatar-lg">{{ initials(client.name) }}</div>
+        <div class="client-avatar-lg">{{ initials(client.firstName + ' ' + client.lastName) }}</div>
         <div class="client-info">
           <h1 class="crm-h1">{{ client.name }}</h1>
           <p class="client-meta">{{ client.email }} &nbsp;·&nbsp; {{ client.phone }}</p>
@@ -110,7 +110,8 @@ const samplePerformance = [
 ]
 
 function initials(name) {
-  return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
+  console.log(name)
+  return name?.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
 }
 
 function formatCurrency(val) {
