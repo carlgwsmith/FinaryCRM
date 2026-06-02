@@ -1,75 +1,119 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { useClientsStore } from 'stores/clients'
-import { storeToRefs } from 'pinia'
+import { ref, computed, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import { useClientsStore } from "stores/clients";
+import { storeToRefs } from "pinia";
 
-const clientStore = useClientsStore()
-const router = useRouter()
-const { clients, loading } = storeToRefs(clientStore)
+const clientStore = useClientsStore();
+const router = useRouter();
+const { clients, loading } = storeToRefs(clientStore);
 
 onMounted(() => {
-clientStore.fetchClients()
-})
+  clientStore.fetchClients();
+});
 
-const search = ref('')
-const activeFilter = ref('all')
+const search = ref("");
+const activeFilter = ref("all");
 
 const filters = [
-  { key: 'all', label: 'All Clients' },
-  { key: 'active', label: 'Active' },
-  { key: 'high-risk', label: 'High Risk' }
-]
+  { key: "all", label: "All Clients" },
+  { key: "active", label: "Active" },
+  { key: "high-risk", label: "High Risk" },
+];
 
 const columns = [
-  { name: 'name', label: 'Name', field: 'name', align: 'left', sortable: true },
-  { name: 'portfolioValue', label: 'Portfolio Value', field: 'portfolioValue', align: 'left', sortable: true },
-  { name: 'riskScore', label: 'Risk Score', field: 'riskScore', align: 'left', sortable: true },
-  { name: 'goalProgress', label: 'Goal Progress', field: 'goalProgress', align: 'left', sortable: true },
-  { name: 'lastUpdated', label: 'Last Updated', field: 'lastUpdated', align: 'left', sortable: true },
-  { name: 'status', label: 'Status', field: 'status', align: 'left', sortable: true },
-  { name: 'actions', label: '', field: 'id', align: 'right', sortable: false }
-]
+  { name: "name", label: "Name", field: "name", align: "left", sortable: true },
+  {
+    name: "portfolioValue",
+    label: "Portfolio Value",
+    field: "portfolioValue",
+    align: "left",
+    sortable: true,
+  },
+  {
+    name: "riskScore",
+    label: "Risk Score",
+    field: "riskScore",
+    align: "left",
+    sortable: true,
+  },
+  {
+    name: "goalProgress",
+    label: "Goal Progress",
+    field: "goalProgress",
+    align: "left",
+    sortable: true,
+  },
+  {
+    name: "lastUpdated",
+    label: "Last Updated",
+    field: "lastUpdated",
+    align: "left",
+    sortable: true,
+  },
+  {
+    name: "status",
+    label: "Status",
+    field: "status",
+    align: "left",
+    sortable: true,
+  },
+  { name: "actions", label: "", field: "id", align: "right", sortable: false },
+];
 
 const filteredClients = computed(() => {
-  let list = clients.value
+  let list = clients.value;
   if (search.value) {
-    const q = search.value.toLowerCase()
-    list = list.filter(c => c.firstName.toLowerCase().includes(q) || c.lastName.toLowerCase().includes(q) || c.email.toLowerCase().includes(q))
+    const q = search.value.toLowerCase();
+    list = list.filter(
+      (c) =>
+        c.firstName.toLowerCase().includes(q) ||
+        c.lastName.toLowerCase().includes(q) ||
+        c.email.toLowerCase().includes(q),
+    );
   }
-  if (activeFilter.value === 'active') {
-    list = list.filter(c => c.status === 'active')
-  } else if (activeFilter.value === 'high-risk') {
-    list = list.filter(c => c.riskScore >= 75)
+  if (activeFilter.value === "active") {
+    list = list.filter((c) => c.status === "active");
+  } else if (activeFilter.value === "high-risk") {
+    list = list.filter((c) => c.riskScore >= 75);
   }
-  return list
-})
+  return list;
+});
 
 function viewClient(id) {
-  router.push(`/clients/edit/${id}`)
+  router.push(`/clients/edit/${id}`);
 }
 
 function editClient(id) {
-  router.push(`/clients/edit/${id}`)
+  router.push(`/clients/edit/${id}`);
 }
 
-const deleteClient = (id)=>{
+const deleteClient = (id) => {
   clientStore.deleteClient(id);
-}
+};
 
 function initials(name) {
-  if (!name) return '?'
-  return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
+  if (!name) return "?";
+  return name
+    .split(" ")
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
 }
 
 function formatCurrency(val) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(val)
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  }).format(val);
 }
 
 function riskColor(score) {
-  if (score >= 80) return '#D20319'
-  if (score >= 60) return '#FF8C00'
-  return '#03BB4C'
+  if (score >= 80) return "#D20319";
+  if (score >= 60) return "#FF8C00";
+  return "#03BB4C";
 }
 </script>
 
@@ -79,7 +123,7 @@ function riskColor(score) {
     <div class="page-header">
       <h1 class="crm-h1">Clients</h1>
       <button class="btn-primary" @click="$router.push('/clients/create')">
-        <q-icon name="add" size="18px" style="margin-right:6px" />
+        <q-icon name="add" size="18px" style="margin-right: 6px" />
         Add Client
       </button>
     </div>
@@ -101,7 +145,8 @@ function riskColor(score) {
           class="filter-chip"
           :class="{ active: activeFilter === f.key }"
           @click="activeFilter = f.key"
-        >{{ f.label }}</span>
+          >{{ f.label }}</span
+        >
       </div>
     </div>
 
@@ -121,7 +166,9 @@ function riskColor(score) {
       >
         <template #body-cell-name="{ row }">
           <td class="name-cell">
-            <div class="client-avatar">{{ initials(row.firstName + ' ' + row.lastName) }}</div>
+            <div class="client-avatar">
+              {{ initials(row.firstName + " " + row.lastName) }}
+            </div>
             <div>
               <div class="client-name-text">{{ row.name }}</div>
               <div class="client-email">{{ row.email }}</div>
@@ -130,14 +177,24 @@ function riskColor(score) {
         </template>
 
         <template #body-cell-portfolioValue="{ row }">
-          <td><span class="portfolio-val">{{ formatCurrency(row.portfolioValue) }}</span></td>
+          <td>
+            <span class="portfolio-val">{{
+              formatCurrency(row.portfolioValue)
+            }}</span>
+          </td>
         </template>
 
         <template #body-cell-riskScore="{ row }">
           <td>
             <div class="risk-bar-wrap">
               <div class="risk-bar">
-                <div class="risk-fill" :style="{ width: row.riskScore + '%', background: riskColor(row.riskScore) }" />
+                <div
+                  class="risk-fill"
+                  :style="{
+                    width: row.riskScore + '%',
+                    background: riskColor(row.riskScore),
+                  }"
+                />
               </div>
               <span class="risk-num">{{ row.riskScore }}</span>
             </div>
@@ -148,7 +205,10 @@ function riskColor(score) {
           <td>
             <div class="goal-progress-wrap">
               <div class="goal-bar">
-                <div class="goal-fill" :style="{ width: row.goalProgress + '%' }" />
+                <div
+                  class="goal-fill"
+                  :style="{ width: row.goalProgress + '%' }"
+                />
               </div>
               <span class="goal-pct">{{ row.goalProgress }}%</span>
             </div>
@@ -160,7 +220,11 @@ function riskColor(score) {
         </template>
 
         <template #body-cell-status="{ row }">
-          <td><span class="status-badge" :class="row.status">{{ row.status }}</span></td>
+          <td>
+            <span class="status-badge" :class="row.status">{{
+              row.status
+            }}</span>
+          </td>
         </template>
 
         <template #body-cell-actions="{ row }">
@@ -194,7 +258,7 @@ function riskColor(score) {
     </div>
   </div>
   <div class="flex justify-center items-center" v-else>
-    <q-spinner size="5em" color="primary"/>
+    <q-spinner size="5em" color="primary" />
   </div>
 </template>
 
@@ -235,7 +299,7 @@ function riskColor(score) {
     font-size: 14px;
     color: var(--crm-text);
     width: 100%;
-    font-family: 'Roboto', sans-serif;
+    font-family: "Roboto", sans-serif;
   }
 
   .filter-chips {
@@ -333,13 +397,15 @@ function riskColor(score) {
   color: var(--crm-text-secondary);
 }
 
-.risk-bar-wrap, .goal-progress-wrap {
+.risk-bar-wrap,
+.goal-progress-wrap {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.risk-bar, .goal-bar {
+.risk-bar,
+.goal-bar {
   width: 80px;
   height: 6px;
   background: #e8e8e8;
@@ -347,7 +413,8 @@ function riskColor(score) {
   overflow: hidden;
 }
 
-.risk-fill, .goal-fill {
+.risk-fill,
+.goal-fill {
   height: 100%;
   border-radius: 3px;
   transition: width 0.3s ease;
@@ -357,7 +424,8 @@ function riskColor(score) {
   background: var(--crm-primary);
 }
 
-.risk-num, .goal-pct {
+.risk-num,
+.goal-pct {
   font-size: 13px;
   min-width: 28px;
 }
@@ -371,7 +439,7 @@ function riskColor(score) {
 
   &.active {
     background: rgba(3, 187, 76, 0.12);
-    color: #03BB4C;
+    color: #03bb4c;
   }
 
   &.inactive {
