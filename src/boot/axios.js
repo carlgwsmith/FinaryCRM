@@ -1,16 +1,24 @@
-import { boot } from 'quasar/wrappers'
-import axios from 'axios'
+import { boot } from "quasar/wrappers";
+import axios from "axios";
+import { useUserStore } from "../stores/user";
 
-const pw = import.meta.env.VITE_API_PASSWORD
-
-const api = axios.create({
-  baseURL: '',
-  auth: { username: 'carl', password: pw }
-})
+const api = axios.create({ baseURL: "" });
 
 export default boot(({ app }) => {
-  app.config.globalProperties.$axios = axios
-  app.config.globalProperties.$api = api
-})
+  const userStore = useUserStore();
 
-export { api }
+  api.interceptors.request.use((config) => {
+    if (userStore.isAuthenticated && userStore.user) {
+      config.auth = {
+        username: userStore.user.username,
+        password: userStore.user.password,
+      };
+    }
+    return config;
+  });
+
+  app.config.globalProperties.$axios = axios;
+  app.config.globalProperties.$api = api;
+});
+
+export { api };

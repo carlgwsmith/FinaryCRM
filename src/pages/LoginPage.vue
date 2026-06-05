@@ -1,3 +1,33 @@
+<script setup>
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+import { useForm, useField } from "vee-validate";
+import { useUserStore } from "../stores/user";
+import * as yup from "yup";
+
+const userStore = useUserStore();
+const router = useRouter();
+const loading = ref(false);
+
+const schema = yup.object({
+  username: yup.string().required("username is required"),
+  password: yup
+    .string()
+    .min(6, "Password must be at least 6 characters")
+    .required("Password is required"),
+});
+
+const { handleSubmit, errors } = useForm({ validationSchema: schema });
+const { value: username } = useField("username");
+const { value: password } = useField("password");
+
+const login = handleSubmit(async () => {
+  loading.value = true;
+  await userStore.login({ name: username.value, password: password.value });
+  loading.value = false;
+  router.push("/dashboard");
+});
+</script>
 <template>
   <div class="login-page">
     <div class="login-card">
@@ -14,15 +44,17 @@
 
       <div class="login-form">
         <div class="form-field">
-          <label>Email</label>
+          <label>Username</label>
           <input
-            v-model="email"
-            type="email"
-            placeholder="carl@finary.com"
-            :class="['crm-input', { 'input-error': errors.email }]"
+            v-model="username"
+            type="username"
+            placeholder="carl"
+            :class="['crm-input', { 'input-error': errors.username }]"
             @keyup.enter="login"
           />
-          <span v-if="errors.email" class="field-error">{{ errors.email }}</span>
+          <span v-if="errors.username" class="field-error">{{
+            errors.username
+          }}</span>
         </div>
         <div class="form-field">
           <label>Password</label>
@@ -33,7 +65,9 @@
             :class="['crm-input', { 'input-error': errors.password }]"
             @keyup.enter="login"
           />
-          <span v-if="errors.password" class="field-error">{{ errors.password }}</span>
+          <span v-if="errors.password" class="field-error">{{
+            errors.password
+          }}</span>
         </div>
         <button class="btn-login" @click="login" :disabled="loading">
           <span v-if="!loading">Sign In</span>
@@ -50,37 +84,10 @@
     <div class="login-bg-deco"></div>
   </div>
 </template>
-
-<script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { useForm, useField } from 'vee-validate'
-import * as yup from 'yup'
-
-const router = useRouter()
-const loading = ref(false)
-
-const schema = yup.object({
-  email: yup.string().email('Must be a valid email').required('Email is required'),
-  password: yup.string().min(8, 'Password must be at least 8 characters').required('Password is required')
-})
-
-const { handleSubmit, errors } = useForm({ validationSchema: schema })
-const { value: email } = useField('email')
-const { value: password } = useField('password')
-
-const login = handleSubmit(async () => {
-  loading.value = true
-  await new Promise(r => setTimeout(r, 600))
-  loading.value = false
-  router.push('/dashboard')
-})
-</script>
-
 <style lang="scss" scoped>
 .login-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #001A5E 0%, #002DA5 60%, #0044CC 100%);
+  background: linear-gradient(135deg, #001a5e 0%, #002da5 60%, #0044cc 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -96,7 +103,7 @@ const login = handleSubmit(async () => {
   max-width: calc(100vw - 48px);
   position: relative;
   z-index: 1;
-  box-shadow: 0 24px 64px rgba(0,0,0,0.2);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.2);
 }
 
 .login-logo {
@@ -117,18 +124,18 @@ const login = handleSubmit(async () => {
   }
 
   .logo-f {
-    font-family: 'Sen', sans-serif;
+    font-family: "Sen", sans-serif;
     font-weight: 700;
     font-size: 26px;
-    color: #0066FF;
+    color: #0066ff;
     line-height: 1;
   }
 
   .logo-text {
-    font-family: 'Sen', sans-serif;
+    font-family: "Sen", sans-serif;
     font-weight: 700;
     font-size: 32px;
-    color: #0066FF;
+    color: #0066ff;
     letter-spacing: -0.5px;
   }
 }
@@ -136,16 +143,16 @@ const login = handleSubmit(async () => {
 .login-title {
   font-size: 28px;
   font-weight: 600;
-  color: #11151F;
+  color: #11151f;
   margin-bottom: 8px;
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
 }
 
 .login-subtitle {
   font-size: 15px;
   color: #676767;
   margin-bottom: 32px;
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
 }
 
 .login-form {
@@ -163,24 +170,30 @@ const login = handleSubmit(async () => {
     font-size: 12px;
     font-weight: 500;
     color: #000;
-    font-family: 'Inter', sans-serif;
+    font-family: "Inter", sans-serif;
   }
 }
 
 .crm-input {
   padding: 10px 14px;
-  border: 1px solid #B6C2E2;
+  border: 1px solid #b6c2e2;
   border-radius: 6px;
   font-size: 15px;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   color: #445275;
   outline: none;
   transition: border-color 0.2s;
   background: white;
 
-  &:focus { border-color: #0066FF; }
-  &::placeholder { color: #bbb; }
-  &.input-error { border-color: #e53935; }
+  &:focus {
+    border-color: #0066ff;
+  }
+  &::placeholder {
+    color: #bbb;
+  }
+  &.input-error {
+    border-color: #e53935;
+  }
 }
 
 .field-error {
@@ -189,14 +202,14 @@ const login = handleSubmit(async () => {
 }
 
 .btn-login {
-  background: #0243EC;
+  background: #0243ec;
   color: white;
   border: none;
   border-radius: 6px;
   padding: 12px 24px;
   font-size: 16px;
   font-weight: 600;
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
   cursor: pointer;
   transition: background 0.2s;
   display: flex;
@@ -205,8 +218,13 @@ const login = handleSubmit(async () => {
   min-height: 44px;
   margin-top: 8px;
 
-  &:hover:not(:disabled) { background: darken(#0243EC, 8%); }
-  &:disabled { opacity: 0.7; cursor: not-allowed; }
+  &:hover:not(:disabled) {
+    background: darken(#0243ec, 8%);
+  }
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
 }
 
 .login-footer {
@@ -222,23 +240,23 @@ const login = handleSubmit(async () => {
   pointer-events: none;
 
   &::before {
-    content: '';
+    content: "";
     position: absolute;
     width: 600px;
     height: 600px;
     border-radius: 50%;
-    border: 1px solid rgba(255,255,255,0.06);
+    border: 1px solid rgba(255, 255, 255, 0.06);
     top: -200px;
     right: -200px;
   }
 
   &::after {
-    content: '';
+    content: "";
     position: absolute;
     width: 400px;
     height: 400px;
     border-radius: 50%;
-    border: 1px solid rgba(255,255,255,0.04);
+    border: 1px solid rgba(255, 255, 255, 0.04);
     bottom: -100px;
     left: -100px;
   }
