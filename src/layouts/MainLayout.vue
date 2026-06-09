@@ -40,20 +40,25 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import AppSidebar from 'components/AppSidebar.vue'
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+import { useUserStore } from "../stores/user";
+import AppSidebar from "components/AppSidebar.vue";
 
-const router = useRouter()
-const sidebarOpen = ref(false)
+const userStore = useUserStore();
+const router = useRouter();
+const sidebarOpen = ref(false);
 
 function logout() {
-  router.push('/login')
+  userStore.logout();
+  router.push("/login");
 }
 </script>
 
 <style lang="scss" scoped>
-.topbar-spacer { flex: 1; }
+.topbar-spacer {
+  flex: 1;
+}
 
 .topbar-right {
   display: flex;
@@ -71,7 +76,7 @@ function logout() {
   font-size: 13px;
   font-weight: 500;
   color: var(--crm-text-secondary);
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
   padding: 8px 12px;
   border-radius: 6px;
   transition: background 0.2s ease;
@@ -83,7 +88,11 @@ function logout() {
 }
 
 .page-fade-enter-active,
-.page-fade-leave-active { transition: opacity 0.2s ease; }
+.page-fade-leave-active {
+  transition: opacity 0.2s ease;
+}
 .page-fade-enter-from,
-.page-fade-leave-to { opacity: 0; }
+.page-fade-leave-to {
+  opacity: 0;
+}
 </style>
