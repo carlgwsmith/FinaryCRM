@@ -8,6 +8,7 @@ import * as yup from "yup";
 const userStore = useUserStore();
 const router = useRouter();
 const loading = ref(false);
+const loginError = ref(null);
 
 const schema = yup.object({
   username: yup.string().required("username is required"),
@@ -23,9 +24,15 @@ const { value: password } = useField("password");
 
 const login = handleSubmit(async () => {
   loading.value = true;
-  await userStore.login({ name: username.value, password: password.value });
-  loading.value = false;
-  router.push("/dashboard");
+  loginError.value = null;
+  try {
+    await userStore.login({ username: username.value, password: password.value });
+    router.push("/dashboard");
+  } catch {
+    loginError.value = "Invalid username or password";
+  } finally {
+    loading.value = false;
+  }
 });
 </script>
 <template>
@@ -69,6 +76,7 @@ const login = handleSubmit(async () => {
             errors.password
           }}</span>
         </div>
+        <span v-if="loginError" class="field-error" style="text-align:center">{{ loginError }}</span>
         <button class="btn-login" @click="login" :disabled="loading">
           <span v-if="!loading">Sign In</span>
           <q-spinner v-else size="18px" color="white" />

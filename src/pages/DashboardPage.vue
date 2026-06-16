@@ -1,16 +1,18 @@
 <template>
   <div class="dashboard-page">
     <!-- Welcome Header -->
-    <h1 class="crm-h1 welcome-heading">
-      Welcome Back, {{ store.currentUser.name }}
-    </h1>
+    <h1 class="crm-h1 welcome-heading">Welcome Back, {{ user.username }}</h1>
 
     <!-- KPI Strip -->
     <div class="crm-stat-strip kpi-strip">
       <div class="crm-stat-item">
         <div class="stat-value blue">
           {{ store.kpis.activeClients }}
-          <q-icon name="people" size="28px" style="color: #0066FF; margin-left:8px" />
+          <q-icon
+            name="people"
+            size="28px"
+            style="color: #0066ff; margin-left: 8px"
+          />
         </div>
         <div class="stat-label">Active Clients</div>
       </div>
@@ -21,7 +23,11 @@
       <div class="crm-stat-item">
         <div class="stat-value dark">
           {{ store.kpis.pendingTransactions }}
-          <q-icon name="schedule" size="28px" style="margin-left:8px;color:#11151F" />
+          <q-icon
+            name="schedule"
+            size="28px"
+            style="margin-left: 8px; color: #11151f"
+          />
         </div>
         <div class="stat-label">Pending Transactions</div>
       </div>
@@ -29,10 +35,8 @@
 
     <!-- Main Grid -->
     <div class="dashboard-grid">
-
       <!-- LEFT COLUMN -->
       <div class="col-left">
-
         <!-- Book of Business Performance Chart -->
         <div class="crm-card">
           <div class="crm-card-header">
@@ -50,7 +54,6 @@
 
         <!-- Bottom row: News + Market -->
         <div class="bottom-row">
-
           <!-- Newsroom Insights -->
           <div class="crm-card">
             <div class="crm-card-header">
@@ -97,8 +100,11 @@
                 class="ticker-item"
               >
                 <div class="ticker-name">{{ m.symbol }}</div>
-                <div class="ticker-value" :class="m.direction === 'up' ? 'up' : 'down'">
-                  {{ m.direction === 'up' ? '+' : '' }}{{ m.change }}%
+                <div
+                  class="ticker-value"
+                  :class="m.direction === 'up' ? 'up' : 'down'"
+                >
+                  {{ m.direction === "up" ? "+" : "" }}{{ m.change }}%
                 </div>
               </div>
             </div>
@@ -113,7 +119,9 @@
                   class="gl-row"
                 >
                   <span class="gl-name">{{ item.name }}</span>
-                  <span class="gl-val text-green">+{{ item.change.toFixed(2) }}%</span>
+                  <span class="gl-val text-green"
+                    >+{{ item.change.toFixed(2) }}%</span
+                  >
                 </div>
               </div>
               <div class="gl-col">
@@ -124,18 +132,18 @@
                   class="gl-row"
                 >
                   <span class="gl-name">{{ item.name }}</span>
-                  <span class="gl-val text-red">{{ item.change.toFixed(2) }}%</span>
+                  <span class="gl-val text-red"
+                    >{{ item.change.toFixed(2) }}%</span
+                  >
                 </div>
               </div>
             </div>
           </div>
-
         </div>
       </div>
 
       <!-- RIGHT COLUMN -->
       <div class="col-right">
-
         <!-- Goal Tracker -->
         <div class="crm-card goal-tracker">
           <div class="crm-card-header">
@@ -143,10 +151,10 @@
           </div>
           <div class="crm-card-body goal-body">
             <GoalGauge :value="81" />
-            <p class="goal-stat">
-              <strong>81%</strong> likely to meet goals
-            </p>
-            <a href="#" class="goal-link text-blue">View Clients By Goal Performance</a>
+            <p class="goal-stat"><strong>81%</strong> likely to meet goals</p>
+            <a href="#" class="goal-link text-blue"
+              >View Clients By Goal Performance</a
+            >
           </div>
         </div>
 
@@ -159,19 +167,20 @@
                 class="crm-tab"
                 :class="{ active: scheduleView === 'calendar' }"
                 @click="scheduleView = 'calendar'"
-              >Calendar View</span>
+                >Calendar View</span
+              >
               <span
                 class="crm-tab"
                 :class="{ active: scheduleView === 'list' }"
                 @click="scheduleView = 'list'"
-              >List View</span>
+                >List View</span
+              >
             </div>
           </div>
           <div class="crm-card-body">
             <ScheduleGrid :events="store.scheduleEvents" :view="scheduleView" />
           </div>
         </div>
-
       </div>
 
       <!-- Recent Clients — full width -->
@@ -184,7 +193,9 @@
         >
           <div>
             <div class="client-name">{{ client.name }}</div>
-            <div class="client-updated">Last Updated: {{ client.lastUpdated }}</div>
+            <div class="client-updated">
+              Last Updated: {{ client.lastUpdated }}
+            </div>
           </div>
           <button class="btn-tertiary" @click="viewClient(client.id)">
             View Client
@@ -192,32 +203,37 @@
           </button>
         </div>
       </div>
-
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { useCRMStore } from 'stores/crm'
-import { useClientsStore } from 'stores/clients'
-import PerformanceChart from 'components/PerformanceChart.vue'
-import GoalGauge from 'components/GoalGauge.vue'
-import ScheduleGrid from 'components/ScheduleGrid.vue'
-import NewsItem from 'components/NewsItem.vue'
+import { ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import { useCRMStore } from "stores/crm";
+import { useClientsStore } from "stores/clients";
+import { useUserStore } from "../stores/user";
+import PerformanceChart from "components/PerformanceChart.vue";
+import GoalGauge from "components/GoalGauge.vue";
+import ScheduleGrid from "components/ScheduleGrid.vue";
+import NewsItem from "components/NewsItem.vue";
+import { storeToRefs } from "pinia";
 
-const store = useCRMStore()
-const clientsStore = useClientsStore()
-const router = useRouter()
-const scheduleView = ref('calendar')
+const store = useCRMStore();
+const userStore = useUserStore();
+
+const clientsStore = useClientsStore();
+const router = useRouter();
+const scheduleView = ref("calendar");
+
+const { user } = storeToRefs(userStore);
 
 onMounted(() => {
-  store.fetchNews()
-})
+  store.fetchNews();
+});
 
 function viewClient(id) {
-  router.push(`/clients/${id}`)
+  router.push(`/clients/${id}`);
 }
 </script>
 
